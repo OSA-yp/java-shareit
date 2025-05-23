@@ -28,7 +28,7 @@ public class ItemMapper {
     }
 
 
-    public static ItemResponseDto toItemResponseDto (Item item){
+    public static ItemResponseDto toItemResponseDto(Item item) {
 
         ItemResponseDto itemResponseDto = new ItemResponseDto();
 
