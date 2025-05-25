@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto createUser(UserRequestDto newUser) {
 
-        checkEmailForExisting(Long.MAX_VALUE, newUser.getEmail()); // проверка, а нет ли уже такой почты
+        checkEmailForExisting(-1L, newUser.getEmail()); // проверка, а нет ли уже такой почты
 
         return UserMapper.toUserResponseDto(
                 userStorage.addUser(UserMapper.toUser(newUser)));
@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
         userStorage.deleteUser(userId);
     }
 
-    public User checkAndGetUserById(Long id) {
+    private User checkAndGetUserById(Long id) {
 
         Optional<User> mayBeUser = userStorage.getUserById(id);
 
@@ -85,5 +85,4 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
-
 }

@@ -17,7 +17,9 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public UserResponseDto createUser(@RequestBody @Valid UserRequestDto newUser) {
+    public UserResponseDto createUser(@RequestBody
+                                      @Valid
+                                      UserRequestDto newUser) {
         return userService.createUser(newUser);
     }
 
@@ -28,15 +30,19 @@ public class UserController {
 
 
     @PatchMapping("/{userId}")
-    public UserResponseDto updateUser(@RequestBody @Valid UserUpdateRequestDto userDataToUpdate, @PathVariable Long userId) {
+    public UserResponseDto updateUser(@RequestBody
+                                      @Valid
+                                      UserUpdateRequestDto userDataToUpdate,
+                                      @PathVariable
+                                      Long userId) {
         return userService.updateUser(userDataToUpdate, userId);
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable long userId) {
+    public void deleteUser(@PathVariable
+                           long userId) {
         userService.deleteUser(userId);
     }
-
 
 
 }

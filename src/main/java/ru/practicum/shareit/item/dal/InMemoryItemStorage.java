@@ -65,14 +65,14 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public Collection<Item> searchItems(String searchString) {
-
+        searchString = searchString.toLowerCase();
         // поиск возвращает только доступные для аренды вещи.
+        String finalSearchString = searchString;
         return items.values()
                 .stream()
                 .filter(item ->
-                        ((item.getName().toLowerCase().contains(searchString.toLowerCase())) ||
-                                (item.getDescription().toLowerCase().contains(searchString.toLowerCase()))) &&
-                                item.getAvailable())
+                        item.getAvailable() && ((item.getName().toLowerCase().contains(finalSearchString)) ||
+                                (item.getDescription().toLowerCase().contains(finalSearchString))))
                 .toList();
 
     }
