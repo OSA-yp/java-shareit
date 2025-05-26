@@ -37,11 +37,17 @@ public class InMemoryUserStorage implements UserStorage {
         return newUser;
     }
 
-    public User updateUser(User userToUpdate) {
-        User user = users.get(userToUpdate.getId());
+    public User updateUser(User userDataToUpdate) {
+        User user = users.get(userDataToUpdate.getId());
 
-        user.setName(userToUpdate.getName());
-        user.setEmail(userToUpdate.getEmail());
+        if (userDataToUpdate.getName() != null) {
+            user.setName(userDataToUpdate.getName());
+        }
+
+        if (userDataToUpdate.getEmail() != null) {
+            user.setEmail(userDataToUpdate.getEmail());
+        }
+
 
         return user;
     }

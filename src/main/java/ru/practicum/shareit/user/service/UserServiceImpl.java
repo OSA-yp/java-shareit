@@ -41,17 +41,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto updateUser(UserUpdateRequestDto userDataToUpdate, Long userId) {
-        User user = checkAndGetUserById(userId);
 
+        checkAndGetUserById(userId);
         checkEmailForExisting(userId, userDataToUpdate.getEmail());
 
-        if (userDataToUpdate.getName() != null) {
-            user.setName(userDataToUpdate.getName());
-        }
+        User user = UserMapper.toUser(userDataToUpdate, userId);
 
-        if (userDataToUpdate.getEmail() != null) {
-            user.setEmail(userDataToUpdate.getEmail());
-        }
+        userStorage.updateUser(user);
 
         return UserMapper.toUserResponseDto(user);
     }
