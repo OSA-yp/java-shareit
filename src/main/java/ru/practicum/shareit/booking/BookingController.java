@@ -5,8 +5,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
+
+import java.util.Collection;
 
 @RestController
 @RequestMapping(path = "/bookings")
@@ -35,19 +36,32 @@ public class BookingController {
 
 
 
-// TODO GET /bookings/{bookingId}
-// Может быть выполнено либо автором бронирования, либо владельцем вещи, к которой относится бронирование
+    @GetMapping("{bookingId}")
+    BookingResponseDto getBookingById(@RequestHeader("X-Sharer-User-Id")
+                                      Long userId,
+                                      @PathVariable Long bookingId) {
+        return service.getBookingById(bookingId, userId);
+    }
 
-// TODO GET /bookings?state={state}
-// Параметр state необязательный и по умолчанию равен ALL (англ. «все»).
-//
-// Также он может принимать значения
-// CURRENT (англ. «текущие»),
-// PAST (англ. «завершённые»),
-// FUTURE (англ. «будущие»),
-// WAITING (англ. «ожидающие подтверждения»),
-// REJECTED (англ. «отклонённые»).
-//
-// Бронирования должны возвращаться отсортированными по дате от более новых к более старым.
+    @GetMapping
+    Collection<BookingResponseDto> getAllBookingAtState(
+            @RequestHeader("X-Sharer-User-Id")
+            Long userId,
+            @RequestParam(defaultValue = "ALL")
+            String state
+    ){
+        return service.getAllBookingAtState(userId, state);
+    }
 
+    // TODO GET /bookings/owner?state={state}
+
+    @GetMapping("/owner")
+    Collection<BookingResponseDto> getAllOwnerBookingAtState(
+            @RequestHeader("X-Sharer-User-Id")
+            Long userId,
+            @RequestParam(defaultValue = "ALL")
+            String state
+    ){
+        return service.getAllOwnerBookingAtState(userId, state);
+    }
 }

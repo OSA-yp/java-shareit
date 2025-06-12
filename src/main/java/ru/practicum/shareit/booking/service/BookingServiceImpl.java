@@ -1,13 +1,12 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dal.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.dto.BookingStatusDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.exception.ForbiddenException;
@@ -18,10 +17,11 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dal.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 // Логирование ошибок в ErrorResponse, логирование запросов - org.zalando
-@Slf4j
 @Service
 @AllArgsConstructor
 public class BookingServiceImpl implements BookingService {
@@ -61,7 +61,7 @@ public class BookingServiceImpl implements BookingService {
         User booker = checkAndgetUser(bookerId);
         Booking booking = checkAndGetBooking(bookingId);
 
-        if (!booking.getItem().getOwner().equals(booker.getId())){
+        if (!booking.getItem().getOwner().equals(booker.getId())) {
             throw new ForbiddenException("Only item owner can change booking approve");
         }
 
@@ -77,8 +77,60 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingResponseDto getBookingById(Long bookingId) {
-        return BookingMapper.toBookingResponseDto(checkAndGetBooking(bookingId));
+    public BookingResponseDto getBookingById(Long bookingId, Long userId) {
+
+
+        User user = checkAndgetUser(userId);
+        Booking booking = checkAndGetBooking(bookingId);
+
+        // Может быть выполнено либо автором бронирования, либо владельцем вещи, к которой относится бронирование
+        if (!(user.getId().equals(booking.getBooker().getId()) ||
+                user.getId().equals(booking.getItem().getOwner()))) {
+            throw new ForbiddenException("Only item owner or booker can get booking");
+        }
+
+        return BookingMapper.toBookingResponseDto(booking);
+    }
+
+    @Override
+    public Collection<BookingResponseDto> getAllBookingAtState(Long userId, String state) {
+
+        BookingStatusDto stateDTO = getBookingStatusDto(state);
+        User booker = checkAndgetUser(userId);
+
+        Collection<Booking> bookings = switch (stateDTO) {
+            case ALL -> bookingRepository.findBookingsByBookerOrderByStartDesc(booker);
+            case CURRENT -> bookingRepository.findCurrentBookings(booker);
+            case PAST -> bookingRepository.findPastBookings(booker);
+            case FUTURE -> bookingRepository.findFutureBookings(booker);
+            default -> bookingRepository.findBookingsByBookerAndStatusOrderByStartDesc(
+                    booker, BookingStatus.valueOf(stateDTO.name()));
+        };
+
+        return bookings.stream()
+                .map(BookingMapper::toBookingResponseDto)
+                .toList();
+
+    }
+
+
+    @Override
+    public Collection<BookingResponseDto> getAllOwnerBookingAtState(Long userId, String state) {
+        BookingStatusDto stateDTO = getBookingStatusDto(state);
+        User booker = checkAndgetUser(userId);
+
+        Collection<Booking> bookings = switch (stateDTO) {
+            case ALL -> bookingRepository.findAllBookingsByOwner(booker.getId());
+            case CURRENT -> bookingRepository.findCurrentBookingsByOwner(booker.getId());
+            case PAST -> bookingRepository.findPastBookingsByOwner(booker.getId());
+            case FUTURE -> bookingRepository.findFutureBookingsByOwner(booker.getId());
+            default -> bookingRepository.findBookingsByOwnerAndStatus(
+                    booker.getId(), BookingStatus.valueOf(stateDTO.name()));
+        };
+
+        return bookings.stream()
+                .map(BookingMapper::toBookingResponseDto)
+                .toList();
     }
 
 
@@ -118,5 +170,15 @@ public class BookingServiceImpl implements BookingService {
         }
 
         return maybeBooking.get();
+    }
+
+    private BookingStatusDto getBookingStatusDto(String state) {
+        BookingStatusDto stateDTO;
+        try {
+            stateDTO = BookingStatusDto.valueOf(state.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Invalid state= " + state);
+        }
+        return stateDTO;
     }
 }
