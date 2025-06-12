@@ -34,4 +34,13 @@ public class UserMapper {
 
         return userResponseDto;
     }
+
+    public static ShortUserResponseDto toShortUserResponseDto(User user) {
+        ShortUserResponseDto shortUserResponseDto = new ShortUserResponseDto();
+
+        shortUserResponseDto.setId(user.getId());
+        shortUserResponseDto.setName(user.getName());
+
+        return shortUserResponseDto;
+    }
 }

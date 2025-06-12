@@ -12,25 +12,25 @@ public class ErrorHandler {
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse exceptionHandler(ValidationException e) {
-        return new ErrorResponse("ValidationException", e.getMessage());
+        return new ErrorResponse("ValidationException", e.getMessage(), e.getStackTrace());
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse notFoundExceptionHandler(NotFoundException e) {
-        return new ErrorResponse("NotFoundException", e.getMessage());
+        return new ErrorResponse("NotFoundException", e.getMessage(), e.getStackTrace());
     }
 
     @ExceptionHandler({ConflictException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse conflictExceptionHandler(ConflictException e) {
-        return new ErrorResponse("ConflictException", e.getMessage());
+        return new ErrorResponse("ConflictException", e.getMessage(), e.getStackTrace());
     }
 
     @ExceptionHandler({ForbiddenException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse forbiddenExceptionHandler(ForbiddenException e) {
-        return new ErrorResponse("ForbiddenException", e.getMessage());
+        return new ErrorResponse("ForbiddenException", e.getMessage(), e.getStackTrace());
     }
 
 

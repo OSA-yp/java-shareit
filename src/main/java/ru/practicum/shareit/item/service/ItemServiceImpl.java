@@ -1,11 +1,10 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dal.ItemStorage;
+import ru.practicum.shareit.item.dal.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
@@ -18,12 +17,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Slf4j
+// Логирование ошибок в ErrorResponse, логирование запросов - org.zalando
 @Service
 @AllArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
-    private final ItemStorage itemStorage;
+    private final ItemRepository repository;
     private final UserService userService;
 
     @Override
@@ -34,7 +33,7 @@ public class ItemServiceImpl implements ItemService {
         Item newItem = ItemMapper.toItem(newItemDto);
         newItem.setOwner(ownerId);
 
-        return ItemMapper.toItemResponseDto(itemStorage.addItem(newItem));
+        return ItemMapper.toItemResponseDto(repository.save(newItem));
     }
 
     @Override
@@ -42,17 +41,26 @@ public class ItemServiceImpl implements ItemService {
 
         userService.getUserById(userId); // проверка, а существует ли user
 
-        Item item = checkAndGetItemById(itemId);
+        Item existingItem = checkAndGetItemById(itemId);
 
         // Редактировать вещь может только её владелец.
-        if (!item.getOwner().equals(userId)) {
-
-            String message = "Only owner can update item id=" + itemId;
-            log.warn(message);
-            throw new ForbiddenException(message);
+        if (!existingItem.getOwner().equals(userId)) {
+            throw new ForbiddenException("Only owner can update item id=" + itemId);
         }
 
-        return ItemMapper.toItemResponseDto(itemStorage.updateItem(ItemMapper.toItem(itemId, itemDataToUpdate)));
+        if (itemDataToUpdate.getName() != null) {
+            existingItem.setName(itemDataToUpdate.getName());
+        }
+
+        if (itemDataToUpdate.getDescription() != null) {
+            existingItem.setDescription(itemDataToUpdate.getDescription());
+        }
+
+        if (itemDataToUpdate.getAvailable() != null) {
+            existingItem.setAvailable(itemDataToUpdate.getAvailable());
+        }
+
+        return ItemMapper.toItemResponseDto(repository.save(existingItem));
     }
 
     @Override
@@ -65,7 +73,7 @@ public class ItemServiceImpl implements ItemService {
 
         userService.getUserById(userId);  // проверка, а существует ли user
 
-        return itemStorage.getAllUserItems(userId).stream()
+        return repository.findByOwner(userId).stream()
                 .map(ItemMapper::toItemResponseDto)
                 .collect(Collectors.toSet());
     }
@@ -77,8 +85,7 @@ public class ItemServiceImpl implements ItemService {
             return Set.of();
         }
 
-
-        return itemStorage.searchItems(searchString).stream()
+        return repository.searchItems(searchString).stream()
                 .map(ItemMapper::toItemResponseDto)
                 .collect(Collectors.toSet());
     }
@@ -86,12 +93,10 @@ public class ItemServiceImpl implements ItemService {
 
     private Item checkAndGetItemById(Long itemId) {
 
-        Optional<Item> maybeItem = itemStorage.getItemById(itemId);
+        Optional<Item> maybeItem = repository.getItemById(itemId);
 
         if (maybeItem.isEmpty()) {
-            String message = "Item with id=" + itemId + " not found";
-            log.warn(message);
-            throw new NotFoundException(message);
+            throw new NotFoundException("Item with id=" + itemId + " not found");
         }
         return maybeItem.get();
     }

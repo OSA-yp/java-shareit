@@ -60,5 +60,6 @@ public class ItemController {
         return itemService.searchItems(searchString);
     }
 
+    // TODO POST /items/{itemId}/comment
 
 }
