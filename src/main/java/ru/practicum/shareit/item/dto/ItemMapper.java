@@ -1,6 +1,10 @@
 package ru.practicum.shareit.item.dto;
 
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 public class ItemMapper {
 
@@ -15,30 +19,47 @@ public class ItemMapper {
         return item;
     }
 
-    public static Item toItem(Long itemId, ItemUpdateRequestDto itemDto) {
-
-        Item item = new Item();
-
-        item.setId(itemId);
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setAvailable(itemDto.getAvailable());
-
-        return item;
-    }
-
 
     public static ItemResponseDto toItemResponseDto(Item item) {
 
-        ItemResponseDto itemResponseDto = new ItemResponseDto();
+        ItemResponseDto dto = new ItemResponseDto();
 
-        itemResponseDto.setId(item.getId());
-        itemResponseDto.setName(item.getName());
-        itemResponseDto.setDescription(item.getDescription());
-        itemResponseDto.setAvailable(item.getAvailable());
+        dto.setId(item.getId());
+        dto.setName(item.getName());
+        dto.setDescription(item.getDescription());
+        dto.setAvailable(item.getAvailable());
+
+        return dto;
+    }
+
+    public static ItemWithCommentsResponseDto toItemWithCommentsResponseDto(Item item,
+                                                                            LocalDateTime lastBookingDate,
+                                                                            LocalDateTime nextBookingDate,
+                                                                            List<CommentResponseDto> comments) {
+
+        ItemWithCommentsResponseDto dto = new ItemWithCommentsResponseDto();
+
+        dto.setId(item.getId());
+        dto.setName(item.getName());
+        dto.setDescription(item.getDescription());
+        dto.setAvailable(item.getAvailable());
+        dto.setLastBooking(lastBookingDate);
+        dto.setNextBooking(nextBookingDate);
+        dto.setComments(comments);
+
+        return dto;
+    }
 
 
-        return itemResponseDto;
+    public static CommentResponseDto toCommentResponseDto(Comment comment, String authorName) {
+        CommentResponseDto dto = new CommentResponseDto();
 
+        dto.setId(comment.getId());
+        dto.setText(comment.getText());
+        dto.setCreated(comment.getCreated());
+        dto.setAuthorName(authorName);
+
+        return dto;
     }
 }
+

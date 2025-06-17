@@ -18,7 +18,6 @@ import ru.practicum.shareit.user.dal.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 // Логирование ошибок в ErrorResponse, логирование запросов - org.zalando

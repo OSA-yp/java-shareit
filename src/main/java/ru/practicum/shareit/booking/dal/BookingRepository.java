@@ -8,7 +8,9 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.user.model.User;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Optional;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -21,7 +23,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Collection<Booking> findBookingsByBookerOrderByStartDesc(User booker);
 
     // Текущие бронирования: APPROVED и start <= now <= end
-    @Query("SELECT b FROM Booking b "+
+    @Query("SELECT b FROM Booking b " +
             "WHERE b.booker = :user AND b.status = 'APPROVED' " +
             "AND b.start <= CURRENT_TIMESTAMP AND b.end >= CURRENT_TIMESTAMP " +
             "ORDER BY b.start DESC")
@@ -59,13 +61,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "ORDER BY b.start DESC")
     Collection<Booking> findFutureBookingsByOwner(@Param("ownerId") Long ownerId);
 
+    // Все бронирования владельца, отсортированные по дате, с определенным статусом
     @Query("SELECT b FROM Booking b " +
             "WHERE b.item.owner = :ownerId AND b.status = :status " +
             "ORDER BY b.start DESC")
     Collection<Booking> findBookingsByOwnerAndStatus(@Param("ownerId") Long ownerId, @Param("status") BookingStatus status);
 
+    // Все бронирования владельца, отсортированные по дате
     @Query("SELECT b FROM Booking b " +
             "WHERE b.item.owner = :ownerId " +
             "ORDER BY b.start DESC")
     Collection<Booking> findAllBookingsByOwner(@Param("ownerId") Long ownerId);
+
+    Optional<Booking> findTopByItemIdAndStartAfterOrderByStartAsc(Long id, LocalDateTime now);
+
+    Optional<Booking> findTopByItemIdAndEndBeforeOrderByEndDesc(Long id, LocalDateTime now);
 }

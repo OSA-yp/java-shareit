@@ -35,7 +35,6 @@ public class BookingController {
     }
 
 
-
     @GetMapping("{bookingId}")
     BookingResponseDto getBookingById(@RequestHeader("X-Sharer-User-Id")
                                       Long userId,
@@ -49,11 +48,9 @@ public class BookingController {
             Long userId,
             @RequestParam(defaultValue = "ALL")
             String state
-    ){
+    ) {
         return service.getAllBookingAtState(userId, state);
     }
-
-    // TODO GET /bookings/owner?state={state}
 
     @GetMapping("/owner")
     Collection<BookingResponseDto> getAllOwnerBookingAtState(
@@ -61,7 +58,7 @@ public class BookingController {
             Long userId,
             @RequestParam(defaultValue = "ALL")
             String state
-    ){
+    ) {
         return service.getAllOwnerBookingAtState(userId, state);
     }
 }
