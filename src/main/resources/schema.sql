@@ -1,3 +1,12 @@
+-- Удаление таблиц с каскадом
+DROP TABLE IF EXISTS bookings CASCADE;
+DROP TABLE IF EXISTS comments CASCADE;
+DROP TABLE IF EXISTS items CASCADE;
+DROP TABLE IF EXISTS requests CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+
+
 -- Создание таблицы пользователей
 CREATE TABLE IF NOT EXISTS users
 (
@@ -59,3 +68,6 @@ CREATE TABLE IF NOT EXISTS comments
     FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE CASCADE
 
 );
+
+
+
