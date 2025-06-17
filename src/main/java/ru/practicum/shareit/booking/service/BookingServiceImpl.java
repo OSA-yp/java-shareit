@@ -29,7 +29,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
 
-    private final BookingStatus FIRST_BOOKING_STATUS = BookingStatus.WAITING;
+    private final static BookingStatus FIRST_BOOKING_STATUS = BookingStatus.WAITING;
 
     @Override
     public BookingResponseDto createBooking(BookingCreateDto dto, Long bookerId) {
