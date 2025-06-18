@@ -19,7 +19,8 @@ spring:
     driver-class-name: "org.postgresql.Driver"
     username: "dbuser"
     password: "12345"
-    url: "jdbc:postgresql://localhost:5432/shareit"
+    url: "jdbc:postgresql://localhost:5455/shareit"
+#    url: "jdbc:postgresql://localhost:5432/shareit"
 
 spring.output.ansi.enabled: always
 
