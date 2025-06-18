@@ -24,7 +24,7 @@ spring:
 spring.output.ansi.enabled: always
 
 server:
-  port: 8088
+  port: 8080
 
 logbook:
   format:
