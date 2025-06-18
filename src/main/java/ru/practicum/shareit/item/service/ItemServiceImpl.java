@@ -72,22 +72,6 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toItemResponseDto(repository.save(existingItem));
     }
 
-    //    @Override
-//    public ItemWithCommentsResponseDto getItemById(Long itemId) {
-//
-//        Item item = checkAndGetItemById(itemId);
-//        User author;
-//
-//        Long lastBooking = bookingRepository.findAllByItemAndEndBefore(item, LocalDateTime.now()).getFirst();
-//        Long nextBooking = bookingRepository.findAllByItemAndEndAfter(item, LocalDateTime.now()).getFirst();
-//        List<CommentResponseDto> comments = commentRepository.getCommentsByItemId(itemId).stream()
-//                .map(comment ->
-//                        ItemMapper.toCommentResponseDto(comment, userRepository.getUserById(comment.getAuthorId()).get().getName())
-//                )
-//                .toList();
-//
-//        return ItemMapper.toItemWithCommentsResponseDto(item, lastBooking, nextBooking, comments);
-//    }
     @Override
     public ItemWithCommentsResponseDto getItemById(Long itemId, Long userId) {
 
@@ -186,7 +170,13 @@ public class ItemServiceImpl implements ItemService {
         } else {
             user = maybeUser.get();
         }
+
         Item item = checkAndGetItemById(itemId);
+        Booking lastBooking = getLatestPastBooking(item);
+
+        if (lastBooking == null) {
+            throw new ValidationException("Can't comment without booking ends");
+        }
 
         if (bookingRepository.findPastBookings(user).stream()
                 .filter(booking -> booking.getItem().getId().equals(itemId))

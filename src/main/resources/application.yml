@@ -31,12 +31,12 @@ logbook:
 
 logging:
   level:
-    root: DEBUG
-    org.zalando.logbook: DEBUG
-    org.springframework.orm.jpa: DEBUG
-    org.springframework.orm.jpa.JpaTransactionManager: DEBUG
-    org.springframework.orm.transaction: DEBUG
-    org.springframework.orm.transaction.interceptor: DEBUG
+    root: INFO
+    org.zalando.logbook: INFO
+    org.springframework.orm.jpa: INFO
+    org.springframework.orm.jpa.JpaTransactionManager: INFO
+    org.springframework.orm.transaction: INFO
+    org.springframework.orm.transaction.interceptor: INFO
 
 
 
