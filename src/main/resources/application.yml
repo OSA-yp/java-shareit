@@ -1,9 +1,9 @@
 spring:
   application:
     name: shareit
-  config:
-    activate:
-      on-profile: prod
+#  config:
+#    activate:
+#      on-profile: prod
   jpa:
     hibernate:
       ddl-auto: none
@@ -15,6 +15,11 @@ spring:
   sql:
     init:
       mode: always
+  datasource:
+    driver-class-name: "org.postgresql.Driver"
+    username: "dbuser"
+    password: "12345"
+    url: "jdbc:postgresql://localhost:5432/shareit"
 
 spring.output.ansi.enabled: always
 
@@ -35,27 +40,27 @@ logging:
 
 
 
----
-spring:
-  config:
-    activate:
-      on-profile: prod
-  datasource:
-    driver-class-name: "org.postgresql.Driver"
-    username: "dbuser"
-    password: "12345"
-    url: "jdbc:postgresql://localhost:5432/shareit"
-
----
-spring:
-  config:
-    activate:
-      on-profile: dev
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true
+#---
+#spring:
+#  config:
+#    activate:
+#      on-profile: prod
+#  datasource:
+#    driver-class-name: "org.postgresql.Driver"
+#    username: "dbuser"
+#    password: "12345"
+#    url: "jdbc:postgresql://localhost:5432/shareit"
+#
+#---
+#spring:
+#  config:
+#    activate:
+#      on-profile: dev
+#  datasource:
+#    url: jdbc:h2:mem:testdb
+#    driver-class-name: org.h2.Driver
+#    username: sa
+#    password:
+#  h2:
+#    console:
+#      enabled: true
