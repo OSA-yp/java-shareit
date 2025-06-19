@@ -13,6 +13,7 @@ import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dal.UserRepository;
+import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -139,12 +140,26 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public Collection<ItemResponseDto> getItemsByUser(Long userId) {
+    public Collection<ItemWithCommentsResponseDto> getItemsByUser(Long userId) {
 
         userService.getUserById(userId);  // проверка, а существует ли user
 
         return repository.findByOwner(userId).stream()
-                .map(ItemMapper::toItemResponseDto)
+                .map(item -> {
+                    LocalDateTime lastBookingEnd = getLatestPastBooking(item) != null
+                            ? getLatestPastBooking(item).getEnd()
+                            : null;
+
+                    LocalDateTime nextBookingStart = getUpcomingBooking(item) != null
+                            ? getUpcomingBooking(item).getStart()
+                            : null;
+
+                    return ItemMapper.toItemWithCommentsResponseDto(
+                            item,
+                            lastBookingEnd,
+                            nextBookingStart,
+                            getCommentsWithAuthors(item));
+                })
                 .collect(Collectors.toSet());
     }
 
@@ -163,13 +178,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public CommentResponseDto addComment(CommentRequestDto dto, Long itemId, Long userId) {
 
-        User user;
-        Optional<User> maybeUser = userRepository.getUserById(userId);
-        if (maybeUser.isEmpty()) {
-            throw new NotFoundException("User with id=" + userId + " not found");
-        } else {
-            user = maybeUser.get();
-        }
+        User user = UserMapper.toUser(userService.getUserById(userId));
 
         Item item = checkAndGetItemById(itemId);
         Booking lastBooking = getLatestPastBooking(item);

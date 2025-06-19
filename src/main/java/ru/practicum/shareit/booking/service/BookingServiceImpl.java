@@ -13,8 +13,10 @@ import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dal.ItemRepository;
+import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dal.UserRepository;
+import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
@@ -29,7 +31,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
 
-    private static final  BookingStatus FIRST_BOOKING_STATUS = BookingStatus.WAITING;
+    private static final BookingStatus FIRST_BOOKING_STATUS = BookingStatus.WAITING;
 
     @Override
     public BookingResponseDto createBooking(BookingCreateDto dto, Long bookerId) {
@@ -38,19 +40,20 @@ public class BookingServiceImpl implements BookingService {
 
         Item item = checkAndgetItem(dto.getItemId());
 
-        if (dto.getEnd().equals(dto.getStart())) {
+        if (!item.getAvailable()) {
+            throw new ValidationException("Item with id=" + item.getId() + " not available");
+        }
+
+        if (dto.getEnd().equals(dto.getStart()) || dto.getEnd().isBefore(dto.getStart())) {
             throw new ValidationException("End date must be after start date");
         }
 
-        Booking newBooking = new Booking();
+        Booking newBooking = BookingMapper.toBooking(booker, item, dto, FIRST_BOOKING_STATUS);
 
-        newBooking.setBooker(booker);
-        newBooking.setItem(item);
-        newBooking.setStart(dto.getStart());
-        newBooking.setEnd(dto.getEnd());
-        newBooking.setStatus(FIRST_BOOKING_STATUS);
 
-        return BookingMapper.toBookingResponseDto(bookingRepository.save(newBooking));
+        return BookingMapper.toBookingResponseDto(bookingRepository.save(newBooking),
+                ItemMapper.toItemResponseDto(newBooking.getItem()),
+                UserMapper.toShortUserResponseDto(newBooking.getBooker()));
     }
 
 
@@ -64,15 +67,21 @@ public class BookingServiceImpl implements BookingService {
             throw new ForbiddenException("Only item owner can change booking approve");
         }
 
-        if (approved) {
-            booking.setStatus(BookingStatus.APPROVED);
+        if (booking.getStatus().equals(BookingStatus.WAITING)) {
+            if (approved) {
+                booking.setStatus(BookingStatus.APPROVED);
+            } else {
+                booking.setStatus(BookingStatus.REJECTED);
+            }
         } else {
-            booking.setStatus(BookingStatus.REJECTED);
+            throw new ValidationException("Booking can approved or rejected in WAITING status");
         }
 
         bookingRepository.save(booking);
 
-        return BookingMapper.toBookingResponseDto(booking);
+        return BookingMapper.toBookingResponseDto(booking,
+                ItemMapper.toItemResponseDto(booking.getItem()),
+                UserMapper.toShortUserResponseDto(booking.getBooker()));
     }
 
     @Override
@@ -88,7 +97,9 @@ public class BookingServiceImpl implements BookingService {
             throw new ForbiddenException("Only item owner or booker can get booking");
         }
 
-        return BookingMapper.toBookingResponseDto(booking);
+        return BookingMapper.toBookingResponseDto(booking,
+                ItemMapper.toItemResponseDto(booking.getItem()),
+                UserMapper.toShortUserResponseDto(booking.getBooker()));
     }
 
     @Override
@@ -107,7 +118,9 @@ public class BookingServiceImpl implements BookingService {
         };
 
         return bookings.stream()
-                .map(BookingMapper::toBookingResponseDto)
+                .map(booking -> BookingMapper.toBookingResponseDto(booking,
+                        ItemMapper.toItemResponseDto(booking.getItem()),
+                        UserMapper.toShortUserResponseDto(booking.getBooker())))
                 .toList();
 
     }
@@ -128,7 +141,9 @@ public class BookingServiceImpl implements BookingService {
         };
 
         return bookings.stream()
-                .map(BookingMapper::toBookingResponseDto)
+                .map(booking -> BookingMapper.toBookingResponseDto(booking,
+                        ItemMapper.toItemResponseDto(booking.getItem()),
+                        UserMapper.toShortUserResponseDto(booking.getBooker())))
                 .toList();
     }
 
@@ -154,9 +169,6 @@ public class BookingServiceImpl implements BookingService {
         }
         item = maybeItem.get();
 
-        if (item.getAvailable().equals(false)) {
-            throw new ValidationException("Item with id=" + itemId + " not available");
-        }
         return item;
     }
 

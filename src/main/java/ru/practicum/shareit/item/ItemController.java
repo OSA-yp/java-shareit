@@ -47,8 +47,8 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemResponseDto> getItemsByUser(@RequestHeader("X-Sharer-User-Id")
-                                                      Long userId) {
+    public Collection<ItemWithCommentsResponseDto> getItemsByUser(@RequestHeader("X-Sharer-User-Id")
+                                                                  Long userId) {
         return itemService.getItemsByUser(userId);
     }
 

@@ -13,7 +13,7 @@ public interface ItemService {
 
     ItemWithCommentsResponseDto getItemById(Long itemId, Long userId);
 
-    Collection<ItemResponseDto> getItemsByUser(Long userId);
+    Collection<ItemWithCommentsResponseDto> getItemsByUser(Long userId);
 
     Collection<ItemResponseDto> searchItems(String searchString);
 
