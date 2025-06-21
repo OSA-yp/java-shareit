@@ -1,11 +1,10 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.dal.UserStorage;
+import ru.practicum.shareit.user.dal.UserRepository;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.dto.UserRequestDto;
 import ru.practicum.shareit.user.dto.UserResponseDto;
@@ -14,13 +13,12 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.Optional;
 
-@Slf4j
+// Логирование ошибок в ErrorResponse, логирование запросов - org.zalando
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserStorage userStorage;
-
+    private final UserRepository repository;
 
     @Override
     public UserResponseDto createUser(UserRequestDto newUser) {
@@ -28,7 +26,7 @@ public class UserServiceImpl implements UserService {
         checkEmailForExisting(-1L, newUser.getEmail()); // проверка, а нет ли уже такой почты
 
         return UserMapper.toUserResponseDto(
-                userStorage.addUser(UserMapper.toUser(newUser)));
+                repository.save(UserMapper.toUser(newUser)));
     }
 
     @Override
@@ -42,42 +40,48 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto updateUser(UserUpdateRequestDto userDataToUpdate, Long userId) {
 
-        checkAndGetUserById(userId);
-        checkEmailForExisting(userId, userDataToUpdate.getEmail());
+        User existingUser = checkAndGetUserById(userId);
+
+
+        if (userDataToUpdate.getName() == null) {
+            userDataToUpdate.setName(existingUser.getName());
+        }
+
+        if (userDataToUpdate.getEmail() == null) {
+            userDataToUpdate.setEmail(existingUser.getEmail());
+        } else {
+            checkEmailForExisting(userId, userDataToUpdate.getEmail());
+        }
 
         User user = UserMapper.toUser(userDataToUpdate, userId);
 
-        userStorage.updateUser(user);
+        repository.save(user);
 
         return UserMapper.toUserResponseDto(user);
     }
 
     @Override
     public void deleteUser(Long userId) {
-        userStorage.deleteUser(userId);
+        repository.deleteById(userId);
     }
 
     private User checkAndGetUserById(Long id) {
 
-        Optional<User> mayBeUser = userStorage.getUserById(id);
+        Optional<User> mayBeUser = repository.getUserById(id);
 
         if (mayBeUser.isPresent()) {
             return mayBeUser.get();
         } else {
-            String message = "User with id=" + id + " not found";
-            log.warn(message);
-            throw new NotFoundException(message);
+            throw new NotFoundException("User with id=" + id + " not found");
         }
     }
 
     private void checkEmailForExisting(Long userId, String email) {
-        Optional<User> userToCheck = userStorage.getUserByEmail(email);
+        Optional<User> userToCheck = repository.getUserByEmail(email);
 
         if (userToCheck.isPresent()) {
             if (!userToCheck.get().getId().equals(userId)) {
-                String message = email + " is already exist";
-                log.warn(message);
-                throw new ConflictException(message);
+                throw new ConflictException("UserServiceImpl: " + email + " is already exist");
             }
         }
     }
