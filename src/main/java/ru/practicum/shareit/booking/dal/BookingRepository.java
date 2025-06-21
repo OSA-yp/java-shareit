@@ -6,10 +6,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -76,4 +78,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Optional<Booking> findTopByItemIdAndStartAfterOrderByStartAsc(Long id, LocalDateTime now);
 
     Optional<Booking> findTopByItemIdAndEndBeforeOrderByEndDesc(Long id, LocalDateTime now);
+
+    @Query("SELECT b FROM Booking b WHERE b.id IN :itemIds AND b.status = 'APPROVED' ORDER BY b.start DESC")
+    List<Booking> findApprovedBookingsByItemIdsOrderByDesc(@Param("itemIds") List<Long> itemIds);
 }
