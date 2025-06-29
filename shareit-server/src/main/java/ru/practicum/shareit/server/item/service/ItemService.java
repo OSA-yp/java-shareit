@@ -1,6 +1,5 @@
 package ru.practicum.shareit.server.item.service;
 
-import jakarta.validation.Valid;
 import ru.practicum.shareit.server.item.dto.*;
 
 import java.util.Collection;
