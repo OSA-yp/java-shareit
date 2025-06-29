@@ -1,6 +1,5 @@
 package ru.practicum.shareit.server.request.service;
 
-import org.springframework.stereotype.Service;
 import ru.practicum.shareit.server.request.dto.RequestRequestDto;
 import ru.practicum.shareit.server.request.dto.RequestResponseDto;
 import ru.practicum.shareit.server.request.dto.RequestWithItemsResponseDto;

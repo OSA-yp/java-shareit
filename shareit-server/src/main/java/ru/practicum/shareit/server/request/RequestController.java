@@ -14,7 +14,7 @@ import java.util.Collection;
 @AllArgsConstructor
 public class RequestController {
 
-    final private RequestService requestService;
+    private final RequestService requestService;
 
     @PostMapping
     public RequestResponseDto createRequest(

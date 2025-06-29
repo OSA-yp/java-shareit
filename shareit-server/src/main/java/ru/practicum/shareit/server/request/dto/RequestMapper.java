@@ -15,7 +15,7 @@ public class RequestMapper {
         return request;
     }
 
-    public static RequestResponseDto toRequestResponseDto(Request request){
+    public static RequestResponseDto toRequestResponseDto(Request request) {
 
         RequestResponseDto dto = new RequestResponseDto();
 
@@ -26,7 +26,7 @@ public class RequestMapper {
         return dto;
     }
 
-    public static RequestWithItemsResponseDto toRequestWithItemsResponseDto(Request request, Collection<ItemInRequestResponseDto> itemsDto){
+    public static RequestWithItemsResponseDto toRequestWithItemsResponseDto(Request request, Collection<ItemInRequestResponseDto> itemsDto) {
 
         RequestWithItemsResponseDto dto = new RequestWithItemsResponseDto();
 
