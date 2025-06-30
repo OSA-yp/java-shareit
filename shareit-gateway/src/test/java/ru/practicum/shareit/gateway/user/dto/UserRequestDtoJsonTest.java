@@ -33,12 +33,7 @@ class UserRequestDtoJsonTest {
     @Test
     void testUserRequestDto_Deserialize() throws IOException {
         // Подготавливаем JSON
-        String content = """
-                    {
-                      "name": "Alice",
-                      "email": "alice@example.com"
-                    }
-                """;
+        String content = "{ \"name\": \"Alice\", \"email\": \"alice@example.com\" }";
 
         // Десериализуем в объект
         UserRequestDto dto = json.parseObject(content);
