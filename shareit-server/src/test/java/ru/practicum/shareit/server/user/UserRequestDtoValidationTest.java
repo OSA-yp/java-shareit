@@ -1,4 +1,4 @@
-package ru.practicum.shareit.server.user.dto;
+package ru.practicum.shareit.server.user;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -6,6 +6,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.practicum.shareit.server.user.dto.UserRequestDto;
 
 import java.util.Set;
 
