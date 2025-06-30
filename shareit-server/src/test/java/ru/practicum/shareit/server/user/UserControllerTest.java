@@ -55,8 +55,8 @@ class UserControllerTest {
         newUser.setName("John");
         newUser.setEmail("john@example.com");
 
-        Mockito.
-                when(userService.createUser(any(UserRequestDto.class)))
+        Mockito
+                .when(userService.createUser(any(UserRequestDto.class)))
                 .thenReturn(savedUser);
 
         mvc.perform(post("/users")
