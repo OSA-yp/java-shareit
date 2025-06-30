@@ -9,8 +9,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 class ErrorHandlerTest {
 
@@ -22,7 +23,6 @@ class ErrorHandlerTest {
         errorHandler = new ErrorHandler();
         webRequest = new ServletWebRequest(new MockHttpServletRequest());
     }
-
 
 
     @Test

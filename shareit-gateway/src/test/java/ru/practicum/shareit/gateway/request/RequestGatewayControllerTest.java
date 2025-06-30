@@ -9,14 +9,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.gateway.booking.dto.BookingResponseDto;
-import ru.practicum.shareit.gateway.booking.dto.ShotBookingStatusDto;
 import ru.practicum.shareit.gateway.item.dto.ItemInRequestResponseDto;
 import ru.practicum.shareit.gateway.request.client.RequestClient;
 import ru.practicum.shareit.gateway.request.dto.RequestRequestDto;
 import ru.practicum.shareit.gateway.request.dto.RequestResponseDto;
 import ru.practicum.shareit.gateway.request.dto.RequestWithItemsResponseDto;
-import ru.practicum.shareit.gateway.user.dto.ShortUserResponseDto;
 
 import java.time.LocalDateTime;
 import java.util.List;

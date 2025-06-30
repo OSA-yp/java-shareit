@@ -6,8 +6,8 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 
-import java.time.LocalDateTime;
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,12 +38,12 @@ class BookingCreateDtoJsonTest {
     void testBookingCreateDto_Deserialize() throws IOException {
         // Подготавливаем JSON
         String content = """
-            {
-              "itemId": 200,
-              "start": "2030-01-01T10:00:00",
-              "end": "2030-01-02T10:00:00"
-            }
-        """;
+                    {
+                      "itemId": 200,
+                      "start": "2030-01-01T10:00:00",
+                      "end": "2030-01-02T10:00:00"
+                    }
+                """;
 
         // Десериализуем в объект
         BookingCreateDto dto = json.parseObject(content);

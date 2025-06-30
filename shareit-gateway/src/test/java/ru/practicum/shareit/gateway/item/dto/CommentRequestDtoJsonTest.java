@@ -33,10 +33,10 @@ class CommentRequestDtoJsonTest {
     void testCommentRequestDto_Deserialize() throws IOException {
         // Подготавливаем JSON
         String content = """
-            {
-              "text": "Very good!"
-            }
-        """;
+                    {
+                      "text": "Very good!"
+                    }
+                """;
 
         // Десериализуем в объект
         CommentRequestDto dto = json.parseObject(content);

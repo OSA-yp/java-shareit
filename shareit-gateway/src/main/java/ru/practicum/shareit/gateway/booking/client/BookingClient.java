@@ -1,7 +1,6 @@
 package ru.practicum.shareit.gateway.booking.client;
 
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.gateway.booking.dto.BookingCreateDto;
