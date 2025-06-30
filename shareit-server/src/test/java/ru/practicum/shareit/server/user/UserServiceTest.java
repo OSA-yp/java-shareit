@@ -130,7 +130,7 @@ class UserServiceTest {
     }
 
     @Test
-    void ExistingUserTest() {
+    void existingUserTest() {
 
         UserRequestDto requestDto = new UserRequestDto();
         requestDto.setName("Test Name");
