@@ -39,13 +39,14 @@ class ItemRequestDtoJsonTest {
     void testItemRequestDto_Deserialize() throws IOException {
         // Подготавливаем JSON
         String content = """
-                    {
-                      "name": "Table",
-                      "description": "Wooden table",
-                      "available": false,
-                      "requestId": 200
-                    }
-                """;
+        {
+          "name": "Table",
+          "description": "Wooden table",
+          "available": false,
+          "requestId": 200
+        }
+        """;
+
 
         // Десериализуем в объект
         ItemRequestDto dto = json.parseObject(content);
