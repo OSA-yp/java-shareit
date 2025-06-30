@@ -6,17 +6,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import ru.practicum.shareit.server.user.dto.UserRequestDto;
 import ru.practicum.shareit.server.user.dto.UserResponseDto;
 import ru.practicum.shareit.server.user.dto.UserUpdateRequestDto;
 import ru.practicum.shareit.server.user.service.UserService;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,34 +24,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-//@ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = UserController.class)
-@Import(UserControllerTest.TestConfig.class)
 class UserControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private MockMvc mvc;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper mapper = new ObjectMapper();
 
-    @Autowired
+    // @MockBean деприкейтед начиная с 3.4.0
+    @MockitoBean
     private UserService userService;
 
     private UserResponseDto savedUser;
 
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public UserService userService() {
-            return Mockito.mock(UserService.class);
-        }
-    }
-
     @BeforeEach
-    void setUp(WebApplicationContext wac) {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+    void setUp() {
 
         savedUser = new UserResponseDto();
         savedUser.setId(1L);
@@ -67,12 +55,15 @@ class UserControllerTest {
         newUser.setName("John");
         newUser.setEmail("john@example.com");
 
-        when(userService.createUser(any(UserRequestDto.class)))
+        Mockito.
+                when(userService.createUser(any(UserRequestDto.class)))
                 .thenReturn(savedUser);
 
-        mockMvc.perform(post("/users")
+        mvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newUser)))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .content(mapper.writeValueAsString(newUser))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(savedUser.getId()))
                 .andExpect(jsonPath("$.name").value(savedUser.getName()))
@@ -85,7 +76,7 @@ class UserControllerTest {
 
         when(userService.getUserById(userId)).thenReturn(savedUser);
 
-        mockMvc.perform(get("/users/{userId}", userId))
+        mvc.perform(get("/users/{userId}", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(savedUser.getId()))
                 .andExpect(jsonPath("$.name").value(savedUser.getName()))
@@ -106,9 +97,9 @@ class UserControllerTest {
 
         when(userService.updateUser(any(), eq(userId))).thenReturn(updatedUser);
 
-        mockMvc.perform(patch("/users/{userId}", userId)
+        mvc.perform(patch("/users/{userId}", userId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDto)))
+                        .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userId))
                 .andExpect(jsonPath("$.name").value(updateDto.getName()))
@@ -119,7 +110,7 @@ class UserControllerTest {
     void deleteUser_ReturnsNoContent() throws Exception {
         long userId = 1L;
 
-        mockMvc.perform(delete("/users/{userId}", userId))
+        mvc.perform(delete("/users/{userId}", userId))
                 .andExpect(status().isOk());
 
         verify(userService, times(1)).deleteUser(userId);

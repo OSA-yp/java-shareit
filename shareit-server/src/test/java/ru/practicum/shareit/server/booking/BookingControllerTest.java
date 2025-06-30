@@ -3,126 +3,137 @@ package ru.practicum.shareit.server.booking;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import ru.practicum.shareit.server.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.server.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.server.booking.model.BookingStatus;
 import ru.practicum.shareit.server.booking.service.BookingService;
 import ru.practicum.shareit.server.item.dto.ItemResponseDto;
 import ru.practicum.shareit.server.user.dto.ShortUserResponseDto;
-import ru.practicum.shareit.server.user.dto.UserResponseDto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @WebMvcTest(controllers = BookingController.class)
-@Import(BookingControllerTest.TestConfig.class)
-@SpringBootTest
-@AutoConfigureMockMvc
-public class BookingControllerTest {
+class BookingControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private MockMvc mvc;
 
-    @Autowired
+    @MockitoBean
     private BookingService bookingService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private ObjectMapper mapper;
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public BookingService bookingService() {
-            return Mockito.mock(BookingService.class);
-        }
-    }
+    private BookingResponseDto bookingResponseDto;
+    private LocalDateTime now;
 
     @BeforeEach
-    void setUp(WebApplicationContext wac) throws Exception {
+    void setUp() {
+        now = LocalDateTime.now();
 
-        UserResponseDto savedUser;
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+        // Создаем item
+        ItemResponseDto item = new ItemResponseDto();
+        item.setId(1L);
+        item.setName("Book");
+        item.setDescription("Interesting book");
+        item.setAvailable(true);
 
-        savedUser = new UserResponseDto();
-        savedUser.setId(1L);
-        savedUser.setName("John Doe");
-        savedUser.setEmail("john.doe@example.com");
+        // Создаем booker
+        ShortUserResponseDto booker = new ShortUserResponseDto();
+        booker.setId(2L);
+        booker.setName("Alice");
 
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(savedUser)))
-                .andExpect(status().isOk());
+        // Инициализируем bookingResponseDto
+        bookingResponseDto = new BookingResponseDto();
+        bookingResponseDto.setId(100L);
+        bookingResponseDto.setStart(now.plusHours(1));
+        bookingResponseDto.setEnd(now.plusHours(2));
+        bookingResponseDto.setItem(item);
+        bookingResponseDto.setBooker(booker);
+        bookingResponseDto.setStatus(BookingStatus.WAITING);
     }
 
     @Test
-    void createBooking_shouldReturnBookingResponseDto() throws Exception {
-        Long userId = 1L;
+    void createBooking_ReturnsCreatedBooking() throws Exception {
+        BookingCreateDto dto = new BookingCreateDto();
+        dto.setItemId(1L);
+        dto.setStart(now.plusHours(1));
+        dto.setEnd(now.plusHours(2));
 
-        BookingCreateDto bookingCreateDto = new BookingCreateDto();
-        bookingCreateDto.setItemId(100L);
-        bookingCreateDto.setStart(LocalDateTime.now().plusDays(1));
-        bookingCreateDto.setEnd(LocalDateTime.now().plusDays(2));
+        when(bookingService.createBooking(any(BookingCreateDto.class), eq(2L))).thenReturn(bookingResponseDto);
 
-        BookingResponseDto responseDto = new BookingResponseDto();
-        responseDto.setId(10L);
-        responseDto.setStart(bookingCreateDto.getStart());
-        responseDto.setEnd(bookingCreateDto.getEnd());
-        responseDto.setStatus(BookingStatus.WAITING);
-        responseDto.setItem(new ItemResponseDto());
-        responseDto.setBooker(new ShortUserResponseDto());
-
-        when(bookingService.createBooking(any(), eq(userId)))
-                .thenReturn(responseDto);
-        mockMvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", userId)
+        mvc.perform(post("/bookings")
+                        .header("X-Sharer-User-Id", 2L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(bookingCreateDto)))
+                        .content(mapper.writeValueAsString(dto))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(responseDto.getId()))
-                .andExpect(jsonPath("$.status").value(responseDto.getStatus().toString()));
+                .andExpect(jsonPath("$.id").value(bookingResponseDto.getId()))
+                .andExpect(jsonPath("$.item.id").value(1L))
+                .andExpect(jsonPath("$.booker.name").value("Alice"))
+                .andExpect(jsonPath("$.status").value("WAITING"));
     }
 
     @Test
-    void updateBooking_shouldReturnUpdatedBooking() throws Exception {
-        Long userId = 1L;
-        Long bookingId = 10L;
-        Boolean approved = true;
+    void updateBooking_Approved_ReturnsUpdatedBooking() throws Exception {
 
-        BookingResponseDto responseDto = new BookingResponseDto();
-        responseDto.setId(bookingId);
-        responseDto.setStatus(BookingStatus.APPROVED);
+        bookingResponseDto.setStatus(BookingStatus.APPROVED);
 
-        when(bookingService.updateBooking(bookingId, userId, approved))
-                .thenReturn(responseDto);
+        when(bookingService.updateBooking(eq(100L), eq(1L), eq(true)))
+                .thenReturn(bookingResponseDto);
 
-        mockMvc.perform(patch("/bookings/{bookingId}", bookingId)
-                        .header("X-Sharer-User-Id", userId)
-                        .param("approved", approved.toString())
-                        .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(patch("/bookings/{bookingId}", 100L)
+                        .header("X-Sharer-User-Id", 1L)
+                        .param("approved", "true"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(bookingId))
                 .andExpect(jsonPath("$.status").value("APPROVED"));
+    }
 
+    @Test
+    void getBookingById_ReturnsBooking() throws Exception {
+        when(bookingService.getBookingById(eq(100L), eq(2L))).thenReturn(bookingResponseDto);
 
+        mvc.perform(get("/bookings/{bookingId}", 100L)
+                        .header("X-Sharer-User-Id", 2L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(100L))
+                .andExpect(jsonPath("$.booker.id").value(2L));
+    }
+
+    @Test
+    void getAllBookingAtState_ReturnsList() throws Exception {
+        when(bookingService.getAllBookingAtState(eq(2L), eq("ALL")))
+                .thenReturn(List.of(bookingResponseDto));
+
+        mvc.perform(get("/bookings")
+                        .header("X-Sharer-User-Id", 2L)
+                        .param("state", "ALL"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(1));
+    }
+
+    @Test
+    void getAllOwnerBookingAtState_ReturnsList() throws Exception {
+        when(bookingService.getAllOwnerBookingAtState(eq(1L), eq("ALL")))
+                .thenReturn(List.of(bookingResponseDto));
+
+        mvc.perform(get("/bookings/owner")
+                        .header("X-Sharer-User-Id", 1L)
+                        .param("state", "ALL"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(1));
     }
 }
