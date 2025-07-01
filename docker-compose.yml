@@ -15,7 +15,7 @@ services:
     image: shareit-server
     container_name: shareit-server
     ports:
-      - "9090:9090"
+      - "9191:9191"
     depends_on:
       - db
     environment:
