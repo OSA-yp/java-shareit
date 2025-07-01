@@ -13,10 +13,11 @@ spring:
     init:
       mode: always
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:postgresql://localhost:5432/shareit
+    driver-class-name: org.postgresql.Driver
+    username: shareit
+    password: shareit
+
 
 spring.output.ansi.enabled: always
 
