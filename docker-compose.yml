@@ -33,7 +33,8 @@ services:
       - POSTGRES_USER=shareit
       - POSTGRES_DB=shareit
     healthcheck:
-      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
-      timeout: 5s
+      test: [ "CMD-SHELL", "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER" ]
       interval: 5s
+      timeout: 5s
       retries: 10
+      start_period: 30s
