@@ -1,6 +1,7 @@
 #chmod a+x ./tests/.github/workflows/wait-for-it.sh
 #docker compose -f docker-compose.yml up --detach  &&
 docker compose -f docker-compose.yml up --detach
+sleep 120
 #echo "Docker is up" &&
 #./tests/.github/workflows/wait-for-it.sh -t 60 localhost:9090 &&
 #echo "Server is up" &&
