@@ -122,7 +122,7 @@ public class RequestServiceImpl implements RequestService {
                     // переводим вещи в dto
                     Collection<ItemInRequestResponseDto> itemsDto = new HashSet<>();
 
-                    if (requestItems != null){
+                    if (requestItems != null) {
                         itemsDto =
                                 requestItems.stream()
                                         .map(ItemMapper::toItemInRequestResponseDto)
