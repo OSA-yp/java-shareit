@@ -120,10 +120,14 @@ public class RequestServiceImpl implements RequestService {
                     Collection<Item> requestItems = requestsItems.get(request.getId());
 
                     // переводим вещи в dto
-                    Collection<ItemInRequestResponseDto> itemsDto =
-                            requestItems.stream()
-                                    .map(ItemMapper::toItemInRequestResponseDto)
-                                    .collect(Collectors.toSet());
+                    Collection<ItemInRequestResponseDto> itemsDto = new HashSet<>();
+
+                    if (requestItems != null){
+                        itemsDto =
+                                requestItems.stream()
+                                        .map(ItemMapper::toItemInRequestResponseDto)
+                                        .collect(Collectors.toSet());
+                    }
 
                     // формируем финальный dto
                     return RequestMapper.toRequestWithItemsResponseDto(request, itemsDto);

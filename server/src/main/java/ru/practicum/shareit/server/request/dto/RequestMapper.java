@@ -37,8 +37,10 @@ public class RequestMapper {
         dto.setId(request.getId());
         dto.setCreated(request.getCreated());
         dto.setDescription(request.getDescription());
-        dto.setItems(itemsDto);
 
+        if (itemsDto != null){
+            dto.setItems(itemsDto);
+        }
         return dto;
 
     }
