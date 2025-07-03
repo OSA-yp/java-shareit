@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.gateway.booking.client.BookingClient;
 import ru.practicum.shareit.gateway.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.gateway.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.gateway.exception.ValidationException;
 
 import java.util.Collection;
 
@@ -22,6 +23,13 @@ public class BookingGatewayController {
                                      BookingCreateDto newBookingData,
                                      @RequestHeader("X-Sharer-User-Id")
                                      Long userId) {
+
+        if (newBookingData.getEnd().equals(newBookingData.getStart()) ||
+                newBookingData.getEnd().isBefore(newBookingData.getStart())) {
+            throw new ValidationException("End date must be after start date");
+        }
+
+
         return client.createBooking(newBookingData, userId);
     }
 

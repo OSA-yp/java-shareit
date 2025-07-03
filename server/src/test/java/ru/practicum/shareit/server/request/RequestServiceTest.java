@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.server.exception.NotFoundException;
 import ru.practicum.shareit.server.item.dal.ItemRepository;
@@ -19,9 +21,8 @@ import ru.practicum.shareit.server.user.dal.UserRepository;
 import ru.practicum.shareit.server.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -65,9 +66,11 @@ class RequestServiceTest {
         request.setDescription("Need a test item");
         request.setRequestor(user.getId());
         request.setCreated(LocalDateTime.now());
+
+
     }
 
-    // ========== createRequest ==========
+
 
     @Test
     void createRequest_success() {
@@ -100,8 +103,20 @@ class RequestServiceTest {
     void getUserRequests_success() {
         when(userRepository.getUserById(anyLong())).thenReturn(Optional.of(user));
         when(requestRepository.findAllByRequestorOrderByCreated(anyLong())).thenReturn(List.of(request));
-        when(itemRepository.findAllByRequestIn(anySet()))
-                .thenReturn(List.of(item));
+
+        Set<Request> requestList = new HashSet<>();
+        requestList.add(request);
+
+        Collection<Long> requestsIds = requestList.stream()
+                .map(Request::getId)
+                .collect(Collectors.toSet());
+
+        Collection<Item> items = new ArrayList<>();
+        items.add(item);
+        when(itemRepository.findAllByRequestIn(requestsIds))
+                .thenReturn(items);
+
+
 
         Collection<RequestWithItemsResponseDto> result = requestService.getUserRequests(user.getId());
 
@@ -121,17 +136,41 @@ class RequestServiceTest {
 
     @Test
     void getOtherUsersRequests_success() {
-        when(userRepository.getUserById(anyLong())).thenReturn(Optional.of(user));
-        when(requestRepository.findAllByRequestorIsNot(anyLong())).thenReturn(List.of(request));
-        when(itemRepository.findAllByRequestIn(anySet()))
-                .thenReturn(List.of(item));
 
-        Collection<RequestWithItemsResponseDto> result = requestService.getOtherUsersRequests(user.getId());
+
+
+        Long requestId = request.getId();
+        Set<Long> idList = new HashSet<>();
+
+        idList.add(requestId);
+
+
+        Long userId = user.getId();
+        when(userRepository.getUserById(userId))
+                .thenReturn(Optional.of(user));
+
+        Set<Request> requestList = new HashSet<>();
+        requestList.add(request);
+        when(requestRepository.findAllByRequestorIsNot(userId))
+                .thenReturn(requestList);
+
+        Collection<Long> requestsIds = requestList.stream()
+                .map(Request::getId)
+                .collect(Collectors.toSet());
+
+        Collection<Item> items = new ArrayList<>();
+        items.add(item);
+        when(itemRepository.findAllByRequestIn(requestsIds))
+                .thenReturn(items);
+
+
+        Collection<RequestWithItemsResponseDto> result = requestService.getOtherUsersRequests(userId);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
-        assertEquals(request.getId(), result.iterator().next().getId());
+        assertEquals(requestId, result.iterator().next().getId());
     }
+
 
     @Test
     void getOtherUsersRequests_userNotFound_throwsNotFoundException() {

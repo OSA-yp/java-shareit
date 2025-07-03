@@ -12,6 +12,8 @@ import ru.practicum.shareit.server.item.dal.ItemRepository;
 import ru.practicum.shareit.server.item.dto.*;
 import ru.practicum.shareit.server.item.model.Comment;
 import ru.practicum.shareit.server.item.model.Item;
+import ru.practicum.shareit.server.request.dal.RequestRepository;
+import ru.practicum.shareit.server.request.model.Request;
 import ru.practicum.shareit.server.user.dal.UserRepository;
 import ru.practicum.shareit.server.user.dto.UserMapper;
 import ru.practicum.shareit.server.user.model.User;
@@ -31,11 +33,19 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
+    private final RequestRepository requestRepository;
 
     @Override
     public ItemResponseDto createItem(ItemRequestDto newItemDto, Long ownerId) {
 
         userService.getUserById(ownerId); // проверка, а существует ли user
+
+        if (newItemDto.getRequestId() != null) {
+            Optional<Request> maybeRequest = requestRepository.getRequestById(newItemDto.getRequestId());
+            if (maybeRequest.isEmpty()) {
+                throw new NotFoundException("Request with id=" + newItemDto.getRequestId() + " not found");
+            }
+        }
 
         Item newItem = ItemMapper.toItem(newItemDto);
         newItem.setOwner(ownerId);
@@ -222,9 +232,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemResponseDto> searchItems(String searchString) {
 
-        if (searchString.isEmpty()) {
-            return Set.of();
-        }
 
         return repository.searchItems(searchString).stream()
                 .map(ItemMapper::toItemResponseDto)

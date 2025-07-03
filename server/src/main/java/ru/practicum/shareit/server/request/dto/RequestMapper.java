@@ -3,14 +3,18 @@ package ru.practicum.shareit.server.request.dto;
 import ru.practicum.shareit.server.item.dto.ItemInRequestResponseDto;
 import ru.practicum.shareit.server.request.model.Request;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 public class RequestMapper {
 
-    public static Request toRequest(RequestRequestDto dto) {
+    public static Request toRequest(RequestRequestDto dto, Long creatorId) {
+
 
         Request request = new Request();
         request.setDescription(dto.getDescription());
+        request.setRequestor(creatorId);
+        request.setCreated(LocalDateTime.now());
 
         return request;
     }

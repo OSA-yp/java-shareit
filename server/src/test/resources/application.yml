@@ -39,3 +39,9 @@ logging:
     org.springframework.orm.transaction: INFO
     org.springframework.orm.transaction.interceptor: INFO
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include=*:
+

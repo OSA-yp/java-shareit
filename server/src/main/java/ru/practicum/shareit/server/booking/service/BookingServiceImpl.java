@@ -45,9 +45,6 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException("Item with id=" + item.getId() + " not available");
         }
 
-        if (dto.getEnd().equals(dto.getStart()) || dto.getEnd().isBefore(dto.getStart())) {
-            throw new ValidationException("End date must be after start date");
-        }
 
         Booking newBooking = BookingMapper.toBooking(booker, item, dto, FIRST_BOOKING_STATUS);
 

@@ -119,19 +119,7 @@ class BookingServiceTest {
                 bookingService.createBooking(dto, booker.getId()));
     }
 
-    @Test
-    void createBookingEndBeforeStart() {
-        when(itemRepository.getItemById(anyLong())).thenReturn(Optional.of(item));
-        when(userRepository.getUserById(anyLong())).thenReturn(Optional.of(booker));
 
-        BookingCreateDto dto = new BookingCreateDto();
-        dto.setItemId(item.getId());
-        dto.setStart(LocalDateTime.now().plusDays(2));
-        dto.setEnd(LocalDateTime.now().plusDays(1));
-
-        assertThrows(ValidationException.class, () ->
-                bookingService.createBooking(dto, booker.getId()));
-    }
 
     @Test
     void createBookingUserNotFound() {

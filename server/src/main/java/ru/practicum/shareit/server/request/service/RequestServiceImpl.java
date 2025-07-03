@@ -33,9 +33,7 @@ public class RequestServiceImpl implements RequestService {
         // проверка пользователя
         checkUser(creatorId);
 
-        Request newRequest = RequestMapper.toRequest(newRequestDto);
-        newRequest.setRequestor(creatorId);
-        newRequest.setCreated(LocalDateTime.now());
+        Request newRequest = RequestMapper.toRequest(newRequestDto, creatorId);
 
         return RequestMapper.toRequestResponseDto(requestRepository.save(newRequest));
     }
@@ -108,22 +106,19 @@ public class RequestServiceImpl implements RequestService {
                 .collect(Collectors.toSet());
 
         //получаем все вещи с id всех запросов
-        Collection<Item> items = itemRepository.findAllByRequestIn(
-                requests.stream()
-                        .map(Request::getId)
-                        .collect(Collectors.toSet()));
+        Collection<Item> items = itemRepository.findAllByRequestIn(requestsIds);
+
 
         // собираем мапу запрос - вещи
         Map<Long, List<Item>> requestsItems = items.stream()
                 .collect(Collectors.groupingBy(Item::getRequest));
-
 
         // формируем результат
         Collection<RequestWithItemsResponseDto> result = requests.stream()
                 .map(request -> {
 
                     // подбираем набор вещей
-                    Collection<Item> requestItems = itemRepository.findAllByRequestIn(requestsIds);
+                    Collection<Item> requestItems = requestsItems.get(request.getId());
 
                     // переводим вещи в dto
                     Collection<ItemInRequestResponseDto> itemsDto =

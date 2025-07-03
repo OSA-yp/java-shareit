@@ -7,6 +7,7 @@ import ru.practicum.shareit.gateway.item.client.ItemClient;
 import ru.practicum.shareit.gateway.item.dto.*;
 
 import java.util.Collection;
+import java.util.Set;
 
 
 @RestController
@@ -59,6 +60,11 @@ public class ItemGatewayController {
             Long userId,
             @RequestParam("text")
             String searchString) {
+
+        if (searchString.isEmpty()) {
+            return Set.of();
+        }
+
         return itemClient.searchItems(userId, searchString);
     }
 
