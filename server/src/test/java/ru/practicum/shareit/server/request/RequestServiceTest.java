@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.server.exception.NotFoundException;
 import ru.practicum.shareit.server.item.dal.ItemRepository;
@@ -71,7 +69,6 @@ class RequestServiceTest {
     }
 
 
-
     @Test
     void createRequest_success() {
         RequestRequestDto dto = new RequestRequestDto();
@@ -117,7 +114,6 @@ class RequestServiceTest {
                 .thenReturn(items);
 
 
-
         Collection<RequestWithItemsResponseDto> result = requestService.getUserRequests(user.getId());
 
         assertNotNull(result);
@@ -136,7 +132,6 @@ class RequestServiceTest {
 
     @Test
     void getOtherUsersRequests_success() {
-
 
 
         Long requestId = request.getId();
